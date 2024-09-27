@@ -1,41 +1,84 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
-from helpers import * 
+from helpers import *
+
+@st.cache_data(hash_funcs={sqlite3.Connection: lambda _: None})
+def get_cached_energy_mix(conn):
+    """Cache the energy mix query to avoid repeated computations."""
+    return get_energy_mix(conn)
+
+@st.cache_data(hash_funcs={sqlite3.Connection: lambda _: None})
+def get_cached_daily_summary(conn):
+    """Cache the daily summary query."""
+    return get_daily_summary(conn)
+
+@st.cache_data(hash_funcs={sqlite3.Connection: lambda _: None})
+def get_cached_weekly_summary(conn):
+    """Cache the weekly summary query."""
+    return get_weekly_summary(conn)
+
+@st.cache_data(hash_funcs={sqlite3.Connection: lambda _: None})
+def get_cached_yearly_summary(conn):
+    """Cache the yearly summary query."""
+    return get_yearly_summary(conn)
+
+# Initialize session state
+if 'conn' not in st.session_state:
+    st.session_state.conn = sqlite3.connect(':memory:', check_same_thread=False)
+    setup_sql_db(st.session_state.conn)
+
+if 'df' not in st.session_state:
+    st.session_state.df = None
+
+if 'data_loaded' not in st.session_state:
+    st.session_state.data_loaded = False
 
 st.title("Gridwatch UK Power Dashboard")
+
+# File uploader
 uploaded_file = st.file_uploader("Upload CSV", type="csv")
 
-if uploaded_file:
-    df = load_and_clean_data(uploaded_file)
-    conn = sqlite3.connect(':memory:')
-    setup_sql_db(conn)
-    write_to_sql(conn, df)
+if uploaded_file and not st.session_state.data_loaded:
+    st.session_state.df = load_and_clean_data(uploaded_file)
+    write_to_sql(st.session_state.conn, st.session_state.df)
+    st.session_state.data_loaded = True
 
+if st.session_state.data_loaded:
+    # Display all views
     st.subheader("Demand with Moving Average")
-    demand_with_moving_avg(df)
-
-    st.subheader("Frequency Over Time")
-    frequency_data = get_frequency(conn)
-    frequency_over_time(frequency_data) 
+    demand_with_moving_avg(st.session_state.df)
 
     st.subheader("Energy Mix Distribution")
-    energy_mix = get_energy_mix(conn)
-    energy_mix_pie_chart(energy_mix)
+    with st.spinner("Loading energy mix data..."):
+        energy_mix = get_cached_energy_mix(st.session_state.conn)
+        energy_mix_pie_chart(energy_mix)
 
     st.subheader("Daily Summary")
-    daily_summary = get_daily_summary(conn)
-    daily_peaks_and_troughs(daily_summary)
+    with st.spinner("Loading daily summary data..."):
+        daily_summary = get_cached_daily_summary(st.session_state.conn)
+        daily_peaks_and_troughs(daily_summary)
 
     st.subheader("Weekly Summary")
-    weekly_summary = get_weekly_summary(conn)
-    st.write(weekly_summary)  
+    with st.spinner("Loading weekly summary data..."):
+        weekly_summary = get_cached_weekly_summary(st.session_state.conn)
+        st.write(weekly_summary)
+        weekly_peaks_and_troughs(weekly_summary)
 
     st.subheader("Yearly Summary")
-    yearly_summary = get_yearly_summary(conn)
-    st.write(yearly_summary)
+    with st.spinner("Loading yearly summary data..."):
+        yearly_summary = get_cached_yearly_summary(st.session_state.conn)
+        st.write(yearly_summary)
+        yearly_peaks_and_troughs(yearly_summary)
 
-    st.subheader("Year-on-Year")
-    year_on_year_comparison(yearly_summary)
-    
-    conn.close()
+    st.subheader("Year-on-Year Comparison")
+    with st.spinner("Loading year-on-year data..."):
+        yearly_summary = get_cached_yearly_summary(st.session_state.conn)
+        year_on_year_comparison(yearly_summary)
+
+else:
+    st.info("Please upload a CSV file to begin.")
+
+def close_db():
+    if 'conn' in st.session_state and st.session_state.conn is not None:
+        st.session_state.conn.close()

@@ -1,37 +1,16 @@
 import streamlit as st
 import pandas as pd
 
-
-# Utility functions
-# @st.cache_data
-# def load_and_clean_data(file):
-#     df = pd.read_csv(file)
-
-#     # remove trailing spaces and whitespace
-#     df.columns = df.columns.str.strip()
-#     df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
-
-#     df.dropna(subset=['timestamp'], inplace=True)
-
-#     # remove na values
-#     df.fillna(0, inplace=True)
-
-#     # remove duplicate timestamp rows
-#     df.drop_duplicates(subset='timestamp', inplace=True)
-
-#     return df
-
 @st.cache_data
 def load_and_clean_data(file):
     chunks = []
+    chunk_size = 10000  # Adjust this based on your file size and available memory
 
-    for chunk in pd.read_csv(file, chunksize=10000):
+    for chunk in pd.read_csv(file, chunksize=chunk_size):
         chunk.columns = chunk.columns.str.strip()
-        
         chunk['timestamp'] = pd.to_datetime(chunk['timestamp'], errors='coerce')
         chunk.dropna(subset=['timestamp'], inplace=True)
         chunk.fillna(0, inplace=True)
-
         chunks.append(chunk)
 
     df = pd.concat(chunks, ignore_index=True)
@@ -67,7 +46,7 @@ def setup_sql_db(conn):
 def get_yearly_summary(conn):
     query = """
     SELECT 
-        CAST(year AS INTEGER) as year, 
+        year, 
         AVG(demand) as avg_demand,
         AVG(frequency) as avg_frequency,
         MAX(demand) as peak_demand,
@@ -75,7 +54,11 @@ def get_yearly_summary(conn):
     FROM power_data 
     GROUP BY year
     """
-    return pd.read_sql_query(query, conn)
+
+    df = pd.read_sql_query(query, conn)
+    df['year'] = df['year'].astype(str)
+
+    return df
 
 def get_weekly_summary(conn):
     query = """
@@ -116,13 +99,6 @@ def get_energy_mix(conn):
         SUM(oil) as oil,
         SUM(solar) as solar,
         SUM(ocgt) as ocgt
-    FROM power_data
-    """
-    return pd.read_sql_query(query, conn)
-
-def get_frequency(conn):
-    query = """
-    SELECT timestamp, frequency
     FROM power_data
     """
     return pd.read_sql_query(query, conn)

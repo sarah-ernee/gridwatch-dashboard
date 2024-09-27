@@ -5,7 +5,6 @@ Data dashboarding contains the below data details:
 - Average frequency and demand, peak and trough demand for daily, weekly and yearly summary
 - Year on year averages 
 - Energy source distribution over time
-- Frequency values over time
 
 Built with Streamlit for the frontend, Plotly for the graphing visualization and SQLite as an in-memory database.
 
