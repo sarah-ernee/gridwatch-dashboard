@@ -12,5 +12,4 @@ Built with Streamlit for the frontend, Plotly for the graphing visualization and
 
 1. Install libraries and packages used with `pip install -r requirements.txt`.
 2. Run Streamlit with `streamlit run main.py`.
-3. Upload Gridwatch CSV file or the sample file provided.
-3. Given the size of CSV file processed, do refresh Streamlit or rerun step 2 if it lags.
+3. Upload Gridwatch CSV file or the sample file included in repo.
