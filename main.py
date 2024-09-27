@@ -45,7 +45,6 @@ if uploaded_file and not st.session_state.data_loaded:
     st.session_state.data_loaded = True
 
 if st.session_state.data_loaded:
-    # Display all views
     st.subheader("Demand with Moving Average")
     demand_with_moving_avg(st.session_state.df)
 
