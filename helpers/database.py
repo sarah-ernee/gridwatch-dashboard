@@ -4,8 +4,9 @@ import pandas as pd
 @st.cache_data
 def load_and_clean_data(file):
     chunks = []
-    chunk_size = 10000  # Adjust this based on your file size and available memory
+    chunk_size = 10000 
 
+    # Process csv in chunks to make large file processing more efficient
     for chunk in pd.read_csv(file, chunksize=chunk_size):
         chunk.columns = chunk.columns.str.strip()
         chunk['timestamp'] = pd.to_datetime(chunk['timestamp'], errors='coerce')

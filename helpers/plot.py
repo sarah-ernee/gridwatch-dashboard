@@ -125,7 +125,6 @@ def weekly_peaks_and_troughs(weekly_summary):
 def yearly_peaks_and_troughs(yearly_summary):
     fig = go.Figure()
 
-    # Change from Bar to Scatter for peaks and troughs
     fig.add_trace(go.Scatter(x=yearly_summary['year'], y=yearly_summary['peak_demand'], 
                              mode='lines', name='Peak Demand'))
     fig.add_trace(go.Scatter(x=yearly_summary['year'], y=yearly_summary['trough_demand'], 

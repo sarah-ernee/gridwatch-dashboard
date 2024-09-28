@@ -3,24 +3,21 @@ import sqlite3
 import pandas as pd
 from helpers import *
 
+# Caching functions so streamlit is not so laggy even with large CSV uploaded
 @st.cache_data(hash_funcs={sqlite3.Connection: lambda _: None})
 def get_cached_energy_mix(conn):
-    """Cache the energy mix query to avoid repeated computations."""
     return get_energy_mix(conn)
 
 @st.cache_data(hash_funcs={sqlite3.Connection: lambda _: None})
 def get_cached_daily_summary(conn):
-    """Cache the daily summary query."""
     return get_daily_summary(conn)
 
 @st.cache_data(hash_funcs={sqlite3.Connection: lambda _: None})
 def get_cached_weekly_summary(conn):
-    """Cache the weekly summary query."""
     return get_weekly_summary(conn)
 
 @st.cache_data(hash_funcs={sqlite3.Connection: lambda _: None})
 def get_cached_yearly_summary(conn):
-    """Cache the yearly summary query."""
     return get_yearly_summary(conn)
 
 # Initialize session state
@@ -44,6 +41,7 @@ if uploaded_file and not st.session_state.data_loaded:
     write_to_sql(st.session_state.conn, st.session_state.df)
     st.session_state.data_loaded = True
 
+# Display the data in streamlit once data is ready
 if st.session_state.data_loaded:
     st.subheader("Demand with Moving Average")
     demand_with_moving_avg(st.session_state.df)
