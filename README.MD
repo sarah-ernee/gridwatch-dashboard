@@ -1,6 +1,7 @@
 # Gridwatch Dashboard
 
 Built with Streamlit for the frontend, Plotly for the graphing visualization and SQLite as an in-memory database.
+Has been tested on Gridwatch dataset from May 2011 to Sep 2024 on the https://www.gridwatch.templar.co.uk/ website.
 
 Data dashboarding contains the below data details:
 - Demand with a seven day moving average
