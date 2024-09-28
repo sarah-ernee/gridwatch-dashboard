@@ -12,7 +12,7 @@ Data dashboarding contains the below data details:
 
 1. Install libraries and packages used with `pip install -r requirements.txt`.
 2. Run Streamlit with `streamlit run main.py`.
-3. Upload Gridwatch CSV file or the sample file included in repo.
+3. Upload Gridwatch CSV file.
 
 ## Navigating the Repo
 
